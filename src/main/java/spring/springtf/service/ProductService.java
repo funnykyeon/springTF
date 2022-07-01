@@ -1,24 +1,48 @@
 package spring.springtf.service;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import spring.springtf.domain.dto.ProductMypriceRequestDto;
+import spring.springtf.domain.dto.ProductRequestDto;
 import spring.springtf.domain.entity.Product;
 import spring.springtf.domain.repository.ProductRepository;
 
-@RequiredArgsConstructor // final로 선언된 멤버 변수를 자동으로 생성합니다.
-@Service // 서비스임을 선언합니다.
+import java.sql.SQLException;
+import java.util.List;
+
+@Service
 public class ProductService {
 
     private final ProductRepository productRepository;
 
-    @Transactional // 메소드 동작이 SQL 쿼리문임을 선언합니다.
-    public Long update(Long id, ProductMypriceRequestDto requestDto) {
-        Product product = productRepository.findById(id).orElseThrow(
-                () -> new NullPointerException("해당 아이디가 존재하지 않습니다.")
-        );
-        product.update(requestDto);
-        return id;
+    @Autowired
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
+    }
+
+    public Product createProduct(ProductRequestDto requestDto) throws SQLException {
+        // 요청받은 DTO 로 DB에 저장할 객체 만들기
+        Product product = new Product(requestDto);
+
+        productRepository.save(product);
+
+        return product;
+    }
+
+    public Product updateProduct(Long id, ProductMypriceRequestDto requestDto) throws SQLException {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new NullPointerException("해당 아이디가 존재하지 않습니다."));
+
+        int myprice = requestDto.getMyprice();
+        product.setMyprice(myprice);
+        productRepository.save(product);
+
+        return product;
+    }
+
+    public List<Product> getProducts() throws SQLException {
+        List<Product> products = productRepository.findAll();
+
+        return products;
     }
 }
