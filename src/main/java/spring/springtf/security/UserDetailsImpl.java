@@ -1,11 +1,14 @@
 package spring.springtf.security;
 
+
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import spring.springtf.domain.entity.User;
+import spring.springtf.enumerate.UserRoleEnum;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 public class UserDetailsImpl implements UserDetails {
 
@@ -51,6 +54,13 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.emptyList();
+        UserRoleEnum userRole = user.getRole();
+        String authority = userRole.getAuthority();
+
+        SimpleGrantedAuthority simpleAuthority = new SimpleGrantedAuthority(authority);
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(simpleAuthority);
+
+        return authorities;
     }
 }
